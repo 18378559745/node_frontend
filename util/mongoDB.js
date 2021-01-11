@@ -45,7 +45,7 @@ var dbSet = {
     insertOne:function (tabName,data,cab) {
         MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
             if (err) throw err;
-            var dbo = db.db("back");            
+            var dbo = db.db("back");
             dbo.collection(tabName).insertOne(data, function(err) {
                 if (err) throw err;
                 list.data = true
