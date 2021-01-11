@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        var person = {
+            find : function (name,cab) {
+                console.log('find')
+                cab(name)
+            },
+            insertOne:function(){
+                console.log('insertOne')
+            }
+        }
+        person.find('back',function(name){
+            console.log(name)
+        })
+    </script>
+</body>
+</html>

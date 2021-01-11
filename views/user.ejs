@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="/javascripts/jquery-3.1.1.min.js"></script>
+    <style>
+      .form{
+          width: 800px;    
+      }
+      .ul{
+          width: 100%;
+          display: flex;
+      }
+      .li{
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border: 1px solid #eee;
+      }
+      .li .delect {
+          height: 33px;
+          margin-top: 5px;
+      }
+      .li img{
+          display: inline-block;
+          width: 50px;
+          height: 50px;
+      }
+      body{
+          display: flex;
+          /* justify-content: space-around; */
+      }
+      .box1{
+          flex: 1;
+      }
+      .box2{
+          flex: 1;
+      }
+      .title{
+          text-align: center;
+      }
+    </style>
+</head>
+<body>
+    <div class="box1">
+        <div class="title">用户表</div>
+        <div>
+            <input type="text" name="" id="user" placeholder="账号">
+        </div>
+        <div>
+            <input type="text" name="" id="password" placeholder="密码">
+        </div>
+        
+        <div>
+            <input type="submit" placeholder="提交" id="sub">        
+        </div>
+        <div>        
+            <input 
+                type="submit" 
+                placeholder="查询" 
+                id="search" 
+                value="查询"
+                onclick="get()"
+            >
+        </div>
+        <div>
+            <input 
+                type="submit" 
+                placeholder="登录" 
+                value="登录"
+                onclick="login()"
+            >        
+        </div>
+        <div class="form" >
+            <div class="ul">
+                <div class="li">账号</div>
+                <div class="li">密码</div>
+                <div class="li">创建时间</div>                                
+                <div class="li"></div>
+            </div>
+        </div>
+        <div class="form" id="form">
+        </div>
+
+    </div>
+    
+    <script>
+        var url = ''
+        // http://localhost:8000
+        var arry = []
+        var page = 1
+        var page_size = 10
+        $('#page').val(page)
+        $('#page_size').val(page_size)
+
+        var mess = document.getElementById("mess");
+
+        function login () {
+            let data = {
+                user:$("#user").val(),
+                password:$("#password").val()
+            }    
+            $.ajax({
+                url:url+'/login', /*接口域名地址*/
+                type:'post',
+                data: data,
+                success:function(res){
+                    console.log('登录成功',res)
+                },
+                error:function(err){
+                    console.log('失败',err)
+                }
+            })
+        }
+        document.getElementById("sub").onclick = function(){
+            let data = {
+                user:$("#user").val(),
+                password:$("#password").val()
+            }    
+            $.ajax({
+                url:url+'/user/add', /*接口域名地址*/
+                type:'post',
+                data: data,
+                success:function(res){
+                    console.log('成功',res)
+                    get ('/user/list')
+                },
+                error:function(err){
+                    console.log('失败',err)
+                }
+            })
+            // sub ('/add/list')
+        }
+        get ('/user/list')
+        function get (src) {
+            $.ajax({
+                    method:"POST",
+                    url:url + '/user/list',
+                    success:function(res){
+                        console.log('list',res)
+                        if( res.code == 200 ) {
+                            let list = res.data
+                            let html = ''
+                            for(var i=0;i<list.length;i++){
+                                    html +=     ` <div class="ul">
+                                            <div class="li">${list[i].user}</div>
+                                            <div class="li">${list[i].password}</div>                                        
+                                            <div class="li">
+                                                ${list[i].create_timer}
+                                            </div>                                        
+                                            <div class="li">
+                                                <input 
+                                                    type="submit" 
+                                                    placeholder="删除" 
+                                                    value="删除" 
+                                                    class="delect" 
+                                                    onclick=delect(${i})
+                                                >                                    
+                                            </div>
+                                        </div>`
+                                }
+                                $('#form').html(html)
+                                arry = list    
+                        }else{
+                            console.log(res.data)
+                        }                                            
+                    },
+                    error:function(err){
+                        console.log('error',err)
+                    //   message('网络连接超时,请稍后请求！','alert_danger')
+                    }
+                })
+        }
+        
+        function delect (index) {
+            $.ajax({
+                method:"POST",
+                url:url+'/user/delete',
+                data:{id:arry[index].id},
+                success:function(res){
+                    get ()
+                },
+                error:function(err){
+                    console.log('error',err)
+                //   message('网络连接超时,请稍后请求！','alert_danger')
+                }
+            })
+        }
+
+        
+        
+    </script>
+</body>
+</html>

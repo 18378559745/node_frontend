@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="/javascripts/jquery-3.1.1.min.js"></script>
+    <style>
+      .form{
+          width: 500px;    
+      }
+      .ul{
+          width: 100%;
+          display: flex;
+      }
+      .li{
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border: 1px solid #eee;
+      }
+      .li .delect {
+          height: 33px;
+          margin-top: 5px;
+          margin-left: 5px;
+      }
+      .li img{
+          display: inline-block;
+          width: 50px;
+          height: 50px;
+      }
+      body{
+          display: flex;
+          /* justify-content: space-around; */
+      }
+      .box1{
+          flex: 1;
+      }
+      .box2{
+          flex: 1;
+      }
+      .title{
+          text-align: center;
+      }
+    </style>
+</head>
+<body>
+    <div class="box1">
+        <div class="title">list表</div>
+        <div>
+            <input type="text" name="" id="name" placeholder="姓名">
+        </div>
+        <div>
+            <input type="text" name="" id="age" placeholder="年龄">
+        </div>
+        <div>
+            <input type="text" id="page" placeholder="页数">
+        </div>
+        <div>
+            <input type="text" id="page_size" placeholder="条数">
+        </div>
+        <div>总数：<span id="total"></span></div>
+        <div>
+            <input type="file" name="file" id="file" >
+        </div>
+        <div>
+            <input type="submit" placeholder="提交" id="sub">        
+        </div>
+        <div>
+            <input type="submit" placeholder="修改" value="修改" onclick="update()">
+        </div>
+        <div>        
+            <input type="submit" placeholder="提交" id="search" value="查询">
+        </div>
+        <div class="form" >
+            <div class="ul">
+                <div class="li">姓名</div>
+                <div class="li">年龄</div>
+                <div class="li">图片</div>
+                <div class="li">id</div>                
+                <div class="li"></div>
+            </div>
+        </div>
+        <div class="form" id="form">
+        </div>
+    </div>
+    <div class="box2">
+        <div class="title">tab表</div>
+        <div>
+            <input type="text" name="" id="t_name" placeholder="名称">
+        </div>
+        <div>
+            <input type="text" name="" id="message" placeholder="备注">
+        </div>
+        <div>
+            <input type="submit" placeholder="提交" id="t_sub">        
+        </div>
+        
+        <div>        
+            <input type="submit" placeholder="提交" id="t_search" value="查询">
+        </div>
+        <div class="form" >
+            <div class="ul">
+                <div class="li">名称</div>
+                <div class="li">备注</div>
+                <div class="li">id</div>
+                <div class="li"></div>
+            </div>
+        </div>
+        <div class="form" id="t_form">
+        </div>
+    </div>
+    <script>
+        var url = ''
+        // http://localhost:8000
+        var arry = []
+        var t_arry = []
+        var page = 1
+        var page_size = 10
+        $('#page').val(page)
+        $('#page_size').val(page_size)
+
+        var mess = document.getElementById("mess");
+
+        document.getElementById("sub").onclick = function(){
+            var formData = new FormData();
+            formData.append("file",$("#file")[0].files[0]);
+            formData.append("name", $("#name").val());
+            formData.append("age",$("#age").val());     
+            $.ajax({
+                url:url+'/upload/list', /*接口域名地址*/
+                type:'post',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success:function(res){
+                    $("#name").val(null)
+                    $("#age").val(null)
+                    console.log('成功',res)
+                    get ('/home/list')
+                },
+                error:function(err){
+                    console.log('失败',err)
+                }
+            })
+            // sub ('/add/list')
+        }
+        document.getElementById("t_sub").onclick = function(){
+            sub ('/tab/add_list')
+        }
+
+        document.getElementById("search").onclick = function(){
+            get ('/home/list')
+        }
+        document.getElementById("t_search").onclick = function(){
+            get ('/tab/list')
+        }
+        get ('/home/list')
+        get ('/tab/list')
+
+        function get (src) {
+            let data = {
+                name:$("#name").val(),
+                age:$("#age").val(),
+                page:$("#page").val(),
+                page_size:$("#page_size").val()
+            }
+
+            $.ajax({
+                    method:"POST",
+                    url:url + src,
+                    data:src == '/home/list' ? data : {},
+                    success:function(res){
+                        console.log('list',res)
+                        if(res.code != 200){
+                            return
+                        }
+                        let list = res.data
+                        let html = ''
+                        if(src == '/home/list'){
+                            for(var i=0;i<list.length;i++){
+                                html +=     ` <div class="ul">
+                                        <div class="li">${list[i].name}</div>
+                                        <div class="li">${list[i].age}</div>                                        
+                                        <div class="li">
+                                            <img src="${url+list[i].path}"></img>
+                                        </div>
+                                        <div class="li">${list[i].id}</div>
+                                        <div class="li">
+                                            <input 
+                                                type="submit" 
+                                                placeholder="删除" 
+                                                value="删除" 
+                                                class="delect"                                                 
+                                                onclick="delect(${list[i].id},'/delect/list')"
+                                            >         
+                                            <input 
+                                                type="submit"
+                                                placeholder="修改" 
+                                                value="修改" 
+                                                class="delect"
+                                                onclick="updateSet(${i})"
+                                            >
+
+                                            </input>                           
+                                        </div>
+                                    </div>`
+                            }
+                            $('#form').html(html)
+                            $("#total").html(res.total)
+                            arry = list
+                        }else{
+                            for(var i=0;i<list.length;i++){
+                                html +=     ` <div class="ul">
+                                        <div class="li">${list[i].name}</div>
+                                        <div class="li">${list[i].message}</div>
+                                        <div class="li">${list[i].id}</div>
+                                        <div class="li">
+                                            <input 
+                                                type="submit" 
+                                                placeholder="删除" 
+                                                value="删除" 
+                                                class="delect"
+                                                onclick="delect(${list[i].id},'/tab/delete_list')"
+                                            >                                    
+                                        </div>
+                                    </div>`
+                            }
+                            $('#t_form').html(html)
+                            t_arry = list
+                        }
+                        
+                        
+                        
+                    },
+                    error:function(err){
+                        console.log('error',err)
+                    //   message('网络连接超时,请稍后请求！','alert_danger')
+                    }
+                })
+        }
+        
+        var updateId = null
+        function updateSet (key) {
+            console.log('record',key,arry[key])
+            updateId = arry[key].id
+            $("#name").val(arry[key].name)
+            $("#age").val(arry[key].age)
+
+        }
+        function update () {
+            var formData = new FormData();
+            formData.append("file",$("#file")[0].files[0]?$("#file")[0].files[0]:'');
+            formData.append("name", $("#name").val());
+            formData.append("age",$("#age").val());
+            formData.append("id",updateId);
+            console.log('修改',formData)
+            $.ajax({
+                url:url+'/update/list', /*接口域名地址*/
+                type:'post',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success:function(res){
+                    $("#name").val(null)
+                    $("#age").val(null)
+                    console.log('成功',res)
+                    get ('/home/list')
+                },
+                error:function(err){
+                    console.log('失败',err)
+                }
+            })
+        }
+
+        function delect (id,src) {
+            console.log("id",id)
+            var flag = src == '/delect/list' ? true : false
+            $.ajax({
+                method:"POST",
+                url:url+src,
+                data:{id:id},
+                success:function(res){
+                    $("#name").val(null)
+                    $("#age").val(null)
+                    get (flag ? '/home/list' : '/tab/list')
+                },
+                error:function(err){
+                    console.log('error',err)
+                //   message('网络连接超时,请稍后请求！','alert_danger')
+                }
+            })
+        }
+
+        function sub (src) {
+            var data = {}
+            let flag = src == '/add/list' ? true:false
+            if(flag){
+                data.name = $("#name").val()
+                data.age = $("#age").val()
+            }else{
+                data.name = $("#t_name").val()
+                data.message = $("#message").val()
+            }
+            $.ajax({
+                method:"POST",
+                url: url + src,
+                data:data,
+                success:function(res){
+                    console.log('res',res)                
+                    get ( flag ? '/home/list' : '/tab/list')
+                },
+                error:function(err){
+                    console.log('error',err)
+                //   message('网络连接超时,请稍后请求！','alert_danger')
+                }
+            })
+        }
+        
+    </script>
+</body>
+</html>
