@@ -122,9 +122,9 @@ app.use(function(err, req, res, next) {
 });
 
 
-// app.listen(80, ()=>{
-//   console.log(80, '------------------')
-// })
+app.listen(80, ()=>{
+  console.log(80, '------------------')
+})
 
 // http.createServer(app).listen(80);
 // https.createServer(httpsOption, app).listen(443);
